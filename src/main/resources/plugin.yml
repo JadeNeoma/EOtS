@@ -1,0 +1,8 @@
+name: EOtS
+version: '${project.version}'
+main: me.jadeneoma.eots.EOtS
+api-version: 1.18
+commands:
+  EOTS:
+    description: An easy way to start and stop the EOTS system
+    usage: \<command> start/stop
