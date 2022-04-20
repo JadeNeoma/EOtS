@@ -17,6 +17,7 @@ class EOtS : JavaPlugin() {
         logger.log(Level.INFO, "EotS Plugin Reporting for duty")
         config.options().copyDefaults()
         saveDefaultConfig()
+        logln("Initialising", "Initialised")
     }
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
@@ -48,8 +49,9 @@ class EOtS : JavaPlugin() {
                             var dest = Pair(config.getDouble("Destination.X"), config.getDouble("Destination.Z"))
                             val diff = Pair(dest.value0 - start.value0, dest.value1 - start.value1)
                             val dist = sqrt(diff.value0.pow(2) + diff.value1.pow(2))
-                            if (dist <= 10) {
-                                logger.log(Level.INFO, "Bounce")
+                            logln("Running, dest: $dest diff: $diff dist: $dist")
+                            if (dist <= 10.0) {
+                                logln("Bounce!")
                                 dest = updateDest()
                                 val newMove = movement(start, dest)
                                 config.set("Movement.X", newMove.value0)
@@ -58,6 +60,7 @@ class EOtS : JavaPlugin() {
                             }
                             val move = Pair(config.getDouble("Movement.X"),config.getDouble("Movement.Z"))
                             val center = Pair(start.value0 + move.value0, start.value1 + move.value1)
+                            logln("moving from $start to $dest with move $move every ${config.getDouble("SPB")} seconds", " ")
                             Bukkit.getWorld("world")!!.setSpawnLocation(center.value0.toInt(), 64 , center.value1.toInt())
                             Bukkit.getWorld("world")!!.worldBorder.setCenter(center.value0, center.value1)
 
@@ -83,9 +86,10 @@ class EOtS : JavaPlugin() {
     fun genLoc(): Pair<Double, Double> {
         // generate new location and return them as pairs
         val rand = Random()
-        val upper = 16000
-        val startX = rand.nextInt(upper).toDouble() + 8000.5
-        val startZ = rand.nextInt(upper).toDouble() + 8000.5
+        val upper = config.getInt("Size")
+        val startX = rand.nextInt(upper).toDouble() - (upper.toDouble()/2 + 0.5)
+        val startZ = rand.nextInt(upper).toDouble() - (upper.toDouble()/2 + 0.5)
+        logln("GenLoc generated: $startX $startZ")
         return Pair(startX, startZ)
     }
 
@@ -95,7 +99,7 @@ class EOtS : JavaPlugin() {
         val moveX = diff.value0 / dist
         val moveZ = diff.value1 / dist
         val test = sqrt(moveX.pow(2) + moveZ.pow(2))
-        logger.log(Level.INFO, " $moveX $moveZ ")
+        logln("diff: $diff dist: $dist MoveX: $moveX moveZ: $moveZ Test $test")
         return Pair(moveX, moveZ)
     }
 
@@ -104,7 +108,14 @@ class EOtS : JavaPlugin() {
         config.set("Destination.X", dest.value0)
         config.set("Destination.Z", dest.value1)
         saveConfig()
+        logln("dest: $dest")
         return dest
+    }
+
+    fun logln(vararg args: String) { // this is just a logger for ease of debugging
+        for (x in args){
+            logger.log(Level.INFO, x)
+        }
     }
 
 
